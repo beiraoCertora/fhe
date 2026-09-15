@@ -1,0 +1,21 @@
+name: "Certora AI Security Audit"
+on:
+  pull_request:
+    branches:
+      - "master"
+permissions:
+  issues: "write"
+  pull-requests: "write"
+  contents: "read"
+jobs:
+  zeus-audit:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "Certora/zeus-guardian-ci@v1"
+        with:
+          api-key: "${{ secrets.AI_AUDITOR_API_KEY }}"
+          context: "contracts/finance/BatcherConfidential.sol,contracts/finance/ERC7821WithExecutor.sol,contracts/finance/README.adoc,contracts/finance/VestingWalletCliffConfidential.sol,contracts/finance/VestingWalletConfidential.sol,contracts/finance/VestingWalletConfidentialFactory.sol,contracts/governance/README.adoc,contracts/governance/utils/VotesConfidential.sol,contracts/interfaces/IERC7984.sol,contracts/interfaces/IERC7984ERC20Wrapper.sol,contracts/interfaces/IERC7984HookModule.sol,contracts/interfaces/IERC7984Receiver.sol,contracts/interfaces/IERC7984Rwa.sol,contracts/interfaces/README.adoc,contracts/mocks/docs/ERC7984MintableBurnable.sol,contracts/mocks/docs/SwapERC7984ToERC20.sol,contracts/mocks/docs/SwapERC7984ToERC7984.sol,contracts/mocks/finance/BatcherConfidentialSwapMock.sol,contracts/mocks/finance/ExchangeMock.sol,contracts/mocks/finance/VestingWalletCliffConfidentialMock.sol,contracts/mocks/finance/VestingWalletConfidentialFactoryMock.sol,contracts/mocks/finance/VestingWalletConfidentialMock.sol,contracts/mocks/import.sol,contracts/mocks/token/ERC20Mock.sol,contracts/mocks/token/ERC7984/extensions/ERC7984HookedMock.sol,contracts/mocks/token/ERC7984/utils/ERC7984HookModuleMock.sol,contracts/mocks/token/ERC7984ERC20WrapperMock.sol,contracts/mocks/token/ERC7984FreezableMock.sol,contracts/mocks/token/ERC7984Mock.sol,contracts/mocks/token/ERC7984ObserverAccessMock.sol,contracts/mocks/token/ERC7984OmnibusMock.sol,contracts/mocks/token/ERC7984ReceiverMock.sol,contracts/mocks/token/ERC7984ReentrantMock.sol,contracts/mocks/token/ERC7984RestrictedMock.sol,contracts/mocks/token/ERC7984RwaMock.sol,contracts/mocks/token/ERC7984VotesMock.sol,contracts/mocks/utils/FHESafeMathMock.sol,contracts/mocks/utils/HandleAccessManagerMock.sol,contracts/mocks/utils/HandleAccessManagerUserMock.sol,contracts/token/ERC7984/ERC7984.sol,contracts/token/ERC7984/extensions/ERC7984ERC20Wrapper.sol,contracts/token/ERC7984/extensions/ERC7984Freezable.sol,contracts/token/ERC7984/extensions/ERC7984Hooked.sol,contracts/token/ERC7984/extensions/ERC7984ObserverAccess.sol,contracts/token/ERC7984/extensions/ERC7984Omnibus.sol,contracts/token/ERC7984/extensions/ERC7984Restricted.sol,contracts/token/ERC7984/extensions/ERC7984Rwa.sol,contracts/token/ERC7984/extensions/ERC7984Votes.sol,contracts/token/ERC7984/utils/ERC7984HookModule.sol,contracts/token/ERC7984/utils/ERC7984Utils.sol,contracts/token/README.adoc,contracts/utils/FHESafeMath.sol,contracts/utils/HandleAccessManager.sol,contracts/utils/README.adoc,contracts/utils/structs/CheckpointsConfidential.sol"
+          issue-severities: "HIGH,MEDIUM,LOW"
+          fail-on: "HIGH"
+          skip-submodules: "true"
+          api-base-url: "http://127.0.0.1:8000"
