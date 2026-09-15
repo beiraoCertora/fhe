@@ -1,0 +1,23 @@
+name: "AI Auditor Security Audit"
+on:
+  pull_request:
+    branches:
+      - "master"
+permissions:
+  issues: "write"
+  pull-requests: "write"
+  contents: "read"
+concurrency:
+  group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+  cancel-in-progress: true
+jobs:
+  ai-auditor-audit:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "Certora/autoprover-guardian-ci@APSupport"
+        with:
+          api-key: "${{ secrets.CERTORA_API_KEY }}"
+          model-mode: "normal"
+          workflow: "ai-auditor-diff"
+          max-iterations: "4"
+          api-base-url: "https://dev-zeus.certora.com"
