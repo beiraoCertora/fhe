@@ -58,15 +58,18 @@ abstract contract ERC7984ERC20Wrapper is ERC7984, IERC7984ERC20Wrapper, IERC1363
         bytes calldata data
     ) public virtual returns (bytes4) {
         // check caller is the token contract
-        require(underlying() == msg.sender, ERC7984UnauthorizedCaller(msg.sender));
+        address underlying_ = underlying();
+        require(underlying_ == msg.sender, ERC7984UnauthorizedCaller(msg.sender));
+
+        uint256 rate_ = rate();
 
         // mint confidential token
         address to = data.length < 20 ? from : address(bytes20(data));
-        _mint(to, FHE.asEuint64(SafeCast.toUint64(amount / rate())));
+        _mint(to, FHE.asEuint64(SafeCast.toUint64(amount / rate_)));
 
         // transfer excess back to the sender
-        uint256 excess = amount % rate();
-        if (excess > 0) SafeERC20.safeTransfer(IERC20(underlying()), from, excess);
+        uint256 excess = amount % rate_;
+        if (excess > 0) SafeERC20.safeTransfer(IERC20(underlying_), from, excess);
 
         // return magic value
         return IERC1363Receiver.onTransferReceived.selector;
@@ -80,11 +83,13 @@ abstract contract ERC7984ERC20Wrapper is ERC7984, IERC7984ERC20Wrapper, IERC1363
      * Returns the amount of wrapped token sent.
      */
     function wrap(address to, uint256 amount) public virtual override returns (euint64) {
+        uint256 rate_ = rate();
+
         // take ownership of the tokens
-        SafeERC20.safeTransferFrom(IERC20(underlying()), msg.sender, address(this), amount - (amount % rate()));
+        SafeERC20.safeTransferFrom(IERC20(underlying()), msg.sender, address(this), amount - (amount % rate_));
 
         // mint confidential token
-        euint64 wrappedAmountSent = _mint(to, FHE.asEuint64(SafeCast.toUint64(amount / rate())));
+        euint64 wrappedAmountSent = _mint(to, FHE.asEuint64(SafeCast.toUint64(amount / rate_)));
         FHE.allowTransient(wrappedAmountSent, msg.sender);
 
         return wrappedAmountSent;
@@ -119,6 +124,8 @@ abstract contract ERC7984ERC20Wrapper is ERC7984, IERC7984ERC20Wrapper, IERC1363
         address to = unwrapRequester(unwrapRequestId);
         require(to != address(0), InvalidUnwrapRequest(unwrapRequestId));
 
+        uint256 rate_ = rate();
+
         euint64 unwrapAmount_ = unwrapAmount(unwrapRequestId);
         delete _unwrapRequests[unwrapRequestId];
 
@@ -129,7 +136,7 @@ abstract contract ERC7984ERC20Wrapper is ERC7984, IERC7984ERC20Wrapper, IERC1363
 
         FHE.checkSignatures(handles, cleartexts, decryptionProof);
 
-        SafeERC20.safeTransfer(IERC20(underlying()), to, unwrapAmountCleartext * rate());
+        SafeERC20.safeTransfer(IERC20(underlying()), to, unwrapAmountCleartext * rate_);
 
         emit UnwrapFinalized(to, unwrapRequestId, unwrapAmount_, unwrapAmountCleartext);
     }

@@ -133,9 +133,10 @@ abstract contract ERC7984Hooked is ERC7984, HandleAccessManager {
     ) internal virtual returns (ebool compliant) {
         address[] memory modules_ = modules(0, type(uint256).max);
         uint256 modulesLength = modules_.length;
+        bool encryptedAmountInitialized = FHE.isInitialized(encryptedAmount);
         compliant = FHE.asEbool(true);
         for (uint256 i = 0; i < modulesLength; ++i) {
-            if (FHE.isInitialized(encryptedAmount)) FHE.allowTransient(encryptedAmount, modules_[i]);
+            if (encryptedAmountInitialized) FHE.allowTransient(encryptedAmount, modules_[i]);
             compliant = FHE.and(compliant, IERC7984HookModule(modules_[i]).preTransfer(from, to, encryptedAmount));
         }
     }
@@ -144,8 +145,9 @@ abstract contract ERC7984Hooked is ERC7984, HandleAccessManager {
     function _runPostTransferHooks(address from, address to, euint64 encryptedAmount) internal virtual {
         address[] memory modules_ = modules(0, type(uint256).max);
         uint256 modulesLength = modules_.length;
+        bool encryptedAmountInitialized = FHE.isInitialized(encryptedAmount);
         for (uint256 i = 0; i < modulesLength; i++) {
-            if (FHE.isInitialized(encryptedAmount)) FHE.allowTransient(encryptedAmount, modules_[i]);
+            if (encryptedAmountInitialized) FHE.allowTransient(encryptedAmount, modules_[i]);
             IERC7984HookModule(modules_[i]).postTransfer(from, to, encryptedAmount);
         }
     }
