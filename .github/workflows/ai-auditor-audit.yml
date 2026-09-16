@@ -1,10 +1,9 @@
-name: "AI Auditor Security Audit"
+name: "AutoProver Formal Verification"
 on:
   pull_request:
     branches:
       - "master"
 permissions:
-  issues: "write"
   pull-requests: "write"
   contents: "read"
 concurrency:
@@ -14,11 +13,16 @@ jobs:
   ai-auditor-audit:
     runs-on: "ubuntu-latest"
     steps:
+      - name: "Reject unsupported fork pull request"
+        if: "${{ github.event.pull_request.head.repo.full_name != github.repository }}"
+        run: "echo \"AutoProver and AutoFuzzer cannot commit generated files to fork pull requests.\"
+
+          exit 1"
       - uses: "Certora/autoprover-guardian-ci@APSupport"
+        if: "${{ github.event.pull_request.head.repo.full_name == github.repository }}"
         with:
           api-key: "${{ secrets.CERTORA_API_KEY }}"
-          wait-for-completion: "false"
-          model-mode: "normal"
-          workflow: "ai-auditor-diff"
-          max-iterations: "2"
+          workflow: "auto-prover"
+          contract-path: "contracts/@fhevm/host-contracts/contracts/ACL.sol"
+          contract-name: "ACL"
           api-base-url: "https://dev-zeus.certora.com"
